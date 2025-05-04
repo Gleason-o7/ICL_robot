@@ -23,7 +23,13 @@ table = [[(i * num_columns + j) for j in range(num_columns)] for i in range(num_
 
 user_idx = int(input("Enter index: "))
 
+
+# Retrive index row
+# Example: 6 // 4 = 1
 row_val = user_idx // num_columns
+
+# Retrive index column
+# Example: 6 % 4 = 2
 column_val = user_idx % num_columns
 
 
