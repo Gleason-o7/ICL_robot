@@ -1,10 +1,26 @@
-from random import randrange
+from random import randrange, choice
 
 # Constants
 ID_RANGE = 100 # Range of possible Ids
 LOWER_BOUND = 0 # Lower bound of 2d array
 UPPER_BOUND = 9 # Upper bound of 2d array
 MIDPOINT = (UPPER_BOUND - LOWER_BOUND + 1) // 2
+    # Random robot
+def create_random_robot(name=None):
+    directions = ["n", "s", "e", "w"]
+
+    x = randrange(LOWER_BOUND, UPPER_BOUND)
+    y = randrange(LOWER_BOUND, UPPER_BOUND)
+
+    if (x, y) in Robot.get_occupied_coordinates():
+        print("Failed to find a free coordinate.")
+        return False
+    
+    direction = choice(directions)
+    name = "Bot"
+
+    robot = Robot(name=name, coordinates=(x, y), direction=direction)
+    return robot
 
 class Robot():
     # Class-level sets to track active robot IDs and occupied coordinates
@@ -21,6 +37,8 @@ class Robot():
             # if set_coordinates succeeds, it assigns the coords and returns true
             if not self.set_coordinates(coordinates):
                 print(f"Robot {self.name or self._id} could not be placed at {coordinates}.")
+
+
 
     @classmethod
     def get_occupied_coordinates(cls):
@@ -129,7 +147,7 @@ class Robot():
             f"Robot:\n{{\n"
             f"\tName: {self.name},\n"
             f"\tID: {self._id},\n"
-            f"\tLocation: {self._coordinates},\n"
+            f"\tLocation/Direction: {self._coordinates}, {self._direction}\n"
             f"\tQuadrant: {self.quadrant}\n}}"
         )
     
@@ -158,6 +176,9 @@ print(robot2)
 # Move robot3 to a free, valid space
 # robot3.set_coordinates((5, 5))
 # print(robot3)
+
+random = create_random_robot()
+print(random)
 
 # Show occupied coordinates
 print("Occupied coordinates:", Robot.get_occupied_coordinates())
