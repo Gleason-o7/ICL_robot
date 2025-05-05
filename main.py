@@ -11,11 +11,11 @@ class Robot():
     _active_ids = set()
     _occupied_coordinates = set()
 
-    def __init__(self, name=None, coordinates=None):
+    def __init__(self, name=None, coordinates=None, direction=None):
         self._id = self._get_unique_id()
         self.name = name
         self._coordinates = None
-
+        self._direction = direction
         # Try to set coordinates only if given
         if coordinates is not None:
             # if set_coordinates succeeds, it assigns the coords and returns true
@@ -44,6 +44,14 @@ class Robot():
     def id(self):
         return self._id
     
+    def set_direction(self, direction):
+        if direction in ("n", "s", "e", "w"):
+            self._direction = direction
+            return True
+        else:
+            print("Invalid direction, options: [n|s|e|w]")
+            return False
+    
     @property
     def quadrant(self):
         if self._coordinates is None:
@@ -65,10 +73,11 @@ class Robot():
     @property
     def coordinates(self):
         return self._coordinates
+    
     def set_name(self, name):
         self.name = name
     
-    def set_coordinates(self, coordinates):
+    def can_move(self, coordinates):
         # Index out-of-bounds check
         if not self._within_bounds(coordinates):
             print(f"Coordinates {coordinates} are out of bounds (must be between ({LOWER_BOUND},{LOWER_BOUND}) and ({UPPER_BOUND},{UPPER_BOUND})).")
@@ -78,7 +87,11 @@ class Robot():
         if coordinates in Robot._occupied_coordinates:
             print(f"Invalid move: Coordinates {coordinates} already occupied.")
             return False
-        
+        return True
+
+    def set_coordinates(self, coordinates):
+        if not self.can_move(coordinates):
+            return False
 
         # Free previous index
         if self._coordinates:
@@ -88,6 +101,28 @@ class Robot():
         self._coordinates = coordinates
         Robot._occupied_coordinates.add(self._coordinates)
         return True
+    
+    def move_forward(self):
+        if self._coordinates is None:
+            print("Cannot move: robot is unplaced.")
+            return False
+
+        x, y = self._coordinates
+
+
+        if self._direction == "n":
+            dx, dy = -1, 0
+        elif self._direction == "s":
+            dx, dy = 1, 0
+        elif self._direction == "e":
+            dx, dy, = 0, 1
+        elif self._direction == "w":
+            dx, dy = 0, -1
+        else: 
+            return False
+        
+        new_coordinates = (x + dx, y + dy)
+        return self.set_coordinates(new_coordinates)
 
     def __str__(self):
         return (
@@ -106,22 +141,23 @@ class Robot():
 robot1 = Robot("Alpha", (2, 3))
 print(robot1)
 
-robot2 = Robot("Beta", (2, 3))  # Will fail - spot taken
+robot2 = Robot("Beta", (2, 4))  # Will fail - spot taken
 print(robot2)
+robot2.set_direction("w")
+robot2.move_forward()
+print(robot2)
+#robot3 = Robot("Gamma", (9, 9))
+#print(robot3)
 
-robot3 = Robot("Gamma", (9, 9))
-print(robot3)
-
-robot4 = Robot("Delta", (10, 10))  # Will fail - out of bounds
-print(robot4)
+# robot4 = Robot("Delta", (10, 10))  # Will fail - out of bounds
+# print(robot4)
 
 # Attempt to move robot3 to an occupied space
-robot3.set_coordinates((2, 3))
+#robot3.set_coordinates((2, 3))
 
 # Move robot3 to a free, valid space
-robot3.set_coordinates((5, 5))
-
-print(robot3)
+# robot3.set_coordinates((5, 5))
+# print(robot3)
 
 # Show occupied coordinates
 print("Occupied coordinates:", Robot.get_occupied_coordinates())
