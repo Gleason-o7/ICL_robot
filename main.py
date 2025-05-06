@@ -4,14 +4,16 @@ from random import randrange, choice
 ID_RANGE = 100 # Range of possible Ids
 LOWER_BOUND = 0 # Lower bound of 2d array
 UPPER_BOUND = 9 # Upper bound of 2d array
-MIDPOINT = (UPPER_BOUND - LOWER_BOUND + 1) // 2
-    # Random robot
+MIDPOINT = (UPPER_BOUND - LOWER_BOUND + 1) / 2. # non-truncated midpoint
+
+# Random robot initialization function
 def create_random_robot(name=None):
     directions = ["n", "s", "e", "w"]
 
     x = randrange(LOWER_BOUND, UPPER_BOUND)
     y = randrange(LOWER_BOUND, UPPER_BOUND)
 
+    # TODO: implement _unnocupied_coords map to make this functionality foolproof
     if (x, y) in Robot.get_occupied_coordinates():
         print("Failed to find a free coordinate.")
         return False
@@ -22,6 +24,11 @@ def create_random_robot(name=None):
     robot = Robot(name=name, coordinates=(x, y), direction=direction)
     return robot
 
+# class variables: active_ids, _occupied_coordinates
+# individual variables: name, coordinates, direction
+# individual immutables: id
+# member functions: 
+#       setters + getters, can_move, move_forward, 
 class Robot():
     # Class-level sets to track active robot IDs and occupied coordinates
     _active_ids = set()
@@ -120,14 +127,17 @@ class Robot():
         Robot._occupied_coordinates.add(self._coordinates)
         return True
     
-    def move_forward(self):
+    def move_forward(self, steps=None):
         if self._coordinates is None:
             print("Cannot move: robot is unplaced.")
             return False
 
+        if steps is None:
+            steps = 1
+
         x, y = self._coordinates
 
-
+        # determing index relationship based on direction
         if self._direction == "n":
             dx, dy = -1, 0
         elif self._direction == "s":
@@ -139,9 +149,18 @@ class Robot():
         else: 
             return False
         
-        new_coordinates = (x + dx, y + dy)
-        return self.set_coordinates(new_coordinates)
+        for step in range(1, steps + 1):
+            
+            #iteratively moves in direction, robot cannot run over other robots
+            new_coordinates = (x + dx * step, y + dy * step)
+            if not self.can_move(new_coordinates):
+                print(f"Move blocked at step {step} to {new_coordinates}.")
+                return self.set_coordinates((x + dx * (step - 1), y + dy * (step - 1)))
+            print(f"Current location + Direction: {new_coordinates}, {self._direction}" )
 
+        return self.set_coordinates((x + dx * steps, y + dy * steps))
+
+    # print formatted information
     def __str__(self):
         return (
             f"Robot:\n{{\n"
@@ -159,10 +178,10 @@ class Robot():
 robot1 = Robot("Alpha", (2, 3))
 print(robot1)
 
-robot2 = Robot("Beta", (2, 4))  # Will fail - spot taken
+robot2 = Robot("Beta", (2, 9))  # Will fail - spot taken
 print(robot2)
 robot2.set_direction("w")
-robot2.move_forward()
+robot2.move_forward(6)
 print(robot2)
 #robot3 = Robot("Gamma", (9, 9))
 #print(robot3)
